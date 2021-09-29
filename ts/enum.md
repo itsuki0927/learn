@@ -141,11 +141,117 @@ enum ComputeEnum {
 
 ### 缺点一: 打印
 
+打印数字枚举的成员时，我们只能看到数字：
+
+```ts
+enum NumEnum {
+  NO,
+  YES,
+}
+
+console.log(NumEnum.NO); // 0
+console.log(NumEnum.YES); // 1
+```
+
 ### 缺点二: 宽松的类型检查
+
+如果使用数字枚举作为类型的时候, 任何数字也可以通过静态编译阶段
+
+```ts
+enum NumEnum {
+  NO,
+  YES,
+}
+
+const isYes = (num: NumEnum) => num === NumEnum.YES;
+
+console.log(isYes(666)); // 编译通过
+```
 
 ### 用字符串枚举代替数字枚举
 
+```ts
+enum StrEnum {
+  YES = 'YES',
+  NO = 'NO',
+}
+
+console.log(NumEnum.NO); // "NO"
+console.log(NumEnum.YES); // "YES"
+```
+
+推荐使用字符串枚举
+
+一方面是打印出来的信息更加具体、 有效
+另一方面是类型检查更加严格
+
+```ts
+enum StrEnum {
+  NO = 'NO',
+  YES = 'YES',
+}
+
+const isYes = (str: StrEnum) => str === StrEnum.YES;
+
+console.log(isYes('abc'));
+// "abc" is not assignable to parameter of type 'StrEnum'.
+```
+
 ## 枚举使用案例
+
+### 位运算
+
+### 多个常量
+
+假如说有一组常量, 我们这么来表示:
+
+```ts
+const info = Symbol('info');
+const debug = Symbol('debug');
+const warn = Symbol('warn');
+const error = Symbol('error');
+```
+
+更好的方式是使用枚举
+
+```ts
+enum Logger {
+  info = 'info',
+  debug = 'debug',
+  warn = 'warn',
+  error = 'error',
+}
+```
+
+使用枚举的好处在于:
+
+1. 常量名称被分组并嵌套在命名空间 Logger, 更好的组织代码
+2. 如果需要其中一个常量的话, 可以使用枚举 Logger, 并且 Ts 还会做静态检查有没有使用其他值
+
+### 比 boolean 更具有描述性
+
+当布尔用于表示备选方案时，枚举通常是一种更具自描述性的选择。
+
+假如说有一个属性值`success:true`来表示接口是否请求成功, 我们可能会用下面的代码
+
+```ts
+type Result = {
+  success: boolean;
+};
+```
+
+然而，枚举更有描述性，并且还有一个额外的好处，即如果需要，我们可以在以后添加更多的替代方案。
+
+```ts
+enum Success {
+  YES,
+  NO,
+}
+
+type Result = {
+  success: Success;
+};
+```
 
 ## 运行时的枚举类型
 
