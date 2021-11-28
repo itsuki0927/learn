@@ -1,5 +1,7 @@
 # for vs for-in vs forEach vs for-of
 
+如果要遍历数组可以使用`for`、`for-in` 、`forEach`、`for-of`, 那么这几种到底有什么区别呢?
+
 ## for
 
 JavaScript 中的 for 循环很古老。它已存在于 ECMAScript 1 中。此 for 循环遍历数组的下标, 并且通过数组下标去读取元素
@@ -162,3 +164,10 @@ for (const k of obj) {
   console.log(k);
 }
 ```
+
+## 总结
+
+- 如果想要从指定下标开始遍历, 使用 for 循环
+- 如果想快速遍历一个数组, 使用 forEach+箭头函数
+- 如果想遍历可迭代对象的话, 使用 for of
+- 如果想要遍历对象, 使用 for in
