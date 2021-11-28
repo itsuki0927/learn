@@ -143,7 +143,7 @@ dom 与标记之间是一对一的关系.
 
 ![](https://www.html5rocks.com/zh/tutorials/internals/howbrowserswork/image015.png)
 
-## 解析算法
+## html 解析
 
 之前说过, html 无法用常规的自上而下/自下而上的解析器进行解析.
 
@@ -263,7 +263,105 @@ dom 与标记之间是一对一的关系.
 > 我们至少要能够处理以后错误情况:
 >
 > 1. 明显不能在某些外部标记中添加的元素. 在此情况下, 我们应该关闭所有标记, 直到出现禁止添加的元素,
->    然后再加入该元素. 
-> 2. 我们不能直接添加的元素. 
+>    然后再加入该元素.
+> 2. 我们不能直接添加的元素.
 > 3. 向 inline 元素添加 block 元素.
 > 4. 如果这样仍然无效, 关闭所有元素, 直到可以添加元素位置, 或者忽略该标记.
+
+### 容错示例
+
+#### 使用了</br>而不是<br>
+
+有些网站使用了</br> 而不是<br>, 为了与 IE 和 Firefox 兼容, Webkit 将其与<br>做了同样的处理.
+代码如下:
+
+```c++
+if(t->isCloseTag(brTag) && m_document->inCompatMode()){
+  reportError(MalformedBRError);
+  t->beginTag=true;
+}
+```
+
+请注意, 错误处理是在内部进行, 用户不会看到这个过程.
+
+#### 离散表格
+
+离散表格是指位于其他表格内容中, 但是又不在任何一个单元格内的表格.
+代码如下:
+
+```html
+<table>
+  <table>
+    <tr>
+      <td>inner table</td>
+    </tr>
+  </table>
+  <tr>
+    <td>outer table</td>
+  </tr>
+</table>
+```
+
+Webkit 会将层次结构更改为两个同级的表格:
+
+```html
+<table>
+  <tr>
+    <td>inner table</td>
+  </tr>
+</table>
+<table>
+  <tr>
+    <td>outer table</td>
+  </tr>
+</table>
+```
+
+代码如下:
+
+```c++
+if (m_inStrayTableContent && localName == tableTag)
+        popBlock(tableTag);
+```
+
+Webkit 使用一个堆栈来保存当前的元素内容, 它会从外部表格的堆栈中弹出内部表格.
+所以这两个表格就变成同级关系了.
+
+#### 嵌套的表单元素
+
+如果用户在一个表单元素中有放入了另一个表单, 那么第二个表单将会忽略.
+代码如下:
+
+```c++
+if(!m_currentFormElement){
+  m_currentFormElement = new HTMLFormElement(formTag, m_document)
+}
+```
+
+#### 过于复杂的标记层次结构
+
+只允许最多 20 层同类型标记的嵌套, 如果嵌套超过 20 层, 就会被全部忽略.
+
+```c++
+bool HTMLParser::allowNestedRedundantTag(const AtomicString& tagName)
+{
+
+unsigned i = 0;
+for (HTMLStackElem* curr = m_blockStack;
+         i < cMaxRedundantTagDepth && curr && curr->tagName == tagName;
+     curr = curr->next, i++) { }
+return i != cMaxRedundantTagDepth;
+}
+```
+
+#### 放错位置的 html/body 结束标签
+
+> 支持格式糟糕的 Html 代码, 不会关闭 body 标签, 有一些网站会在文档还没结束的时候就提前关闭 body 标签,
+> 浏览器通过调用 end()来执行关闭操作
+
+```c++
+if (t->tagName == htmlTag || t->tagName == bodyTag )
+        return;
+```
+
+## css 解析
