@@ -44,7 +44,7 @@ type AppProps = {
 
 ### JSX.Element vs React.ReactNode
 
-一个更技术解释的是，有效的 React 节点与 React.Createelement 的返回结果不同。无论组件最终渲染，React.createElement 始终返回一个对象，它是 JSX.Element 接口，但 react.createElement 是组件的所有可能返回值的集合。
+有效的 `React` 节点与 `React.CreateElement` 的返回结果不同。无论组件最终渲染，`React.createElement` 始终返回一个对象，它是 `JSX.Element` 接口，但 `react.createElement` 是组件的所有可能返回值的集合。
 
 ## 函数式组件
 
@@ -152,4 +152,260 @@ const Counter = () => {
 import {Reducer} from 'redux'
 
 export function reducer: Reducer<AppState,Action>(){}
+```
+
+### useRef
+
+在`typescript`中, `useRef` 返回的引用要么是只读`RefObject`的, 要么是可变`MutableRefObject`的,
+这取决于参数类型是否完成覆盖了初始值.
+
+#### DOM element ref
+
+访问一个 DOM 元素: 只提供元素类型作为参数, 使用 null 作为初始值. 在这种情况下,
+返回的引用将是一个只读的`.current`
+
+```tsx
+import { useRef, useEffect } from 'react';
+
+function Foo() {
+  // 参数类型尽可能的具体, 使用`HTMLDivElement`比`HTMLElement`要更加具体
+  // `HTMLDivElement`没有包含`null`, 所以是返回的只读的`RefObject<HTMLDivElement>`
+  const divRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // 缩小类型, 使用`if`语句排除`null`的可能性
+    if (!divRef.current) throw Error('divRef is not assigned');
+
+    console.log(divRef.current);
+  });
+
+  return <div ref={divRef}>etc</div>;
+}
+```
+
+如果你可以确保`divRef.current`不为`null`, 可以在初始化时使用非空断言`!`
+
+```tsx
+const divRef = useRef<HTMLDivElement>(null!);
+// 不需要做非null检查
+console.log(divRef.current);
+```
+
+请注意!!! 这里还有两点补充.
+
+1. 在这里使用非空断言选择了类型安全, 如果没有将`divRef` 绑定到一个元素,
+   或者如果引用的元素被条件渲染时, 会产生运行时错误.
+2. 并且这里的`divRef`是一个`MutableRefObject<HTMLDivElement>`.
+
+第一点, 直接看下面的 🌰.
+
+```tsx
+import React, { useRef, useEffect } from 'react';
+interface Example2Props {
+  shouldRender: boolean;
+}
+
+// 忘记绑定到元素
+const Example1 = () => {
+  const divRef = useRef<HTMLDivElement>(null); // RefObject<HTMLDivElement>
+  useEffect(() => {
+    console.log(divRef.current); // null
+  });
+  return <div> etc </div>; // 忘记把divRef给绑定到div上了
+};
+
+// 条件渲染
+const Example2 = ({ shouldRender }: Example2Props) => {
+  const divRef = useRef<HTMLDivElement>(null); // RefObject<HTMLDivElement>
+  useEffect(() => {
+    console.log(divRef.current); // 只有当shouldRender为true的时候才会绑定上
+  });
+  return shouldRender ? <div ref={divRef} /> : <div> etc </div>;
+};
+```
+
+第二点, 我们来看一下`useRef`的 ts 定义.
+
+```tsx
+function useRef<T>(initialValue: T): MutableRefObject<T>;
+function useRef<T>(initialValue: T | null): RefObject<T>;
+function useRef<T = undefined>(): MutableRefObject<T | undefined>;
+```
+
+看到上面的定义, 结合下面的例子
+
+```tsx
+useRef<HTMLDivElement>(null!); // MutableRefObject
+useRef<HTMLDivElement>(null); // RefObject
+useRef<HTMLDivElement | null>(null); // MutableRefObject
+```
+
+想想为什么是这样子?
+
+1. ref1 初始值是非空(使用了非空断言), 所以匹配第一个类型声明, 返回`MutableRefObject`
+2. ref2 初始值是`null`, 所以匹配第二个类型声明, 返回`RefObject`
+3. ref3 初始值是`null`, 传递的类型的是`HTMLDivElement|null`,
+   所以匹配第一个类型返回`MutableRefObject`
+
+`Ref` 需要更加具体的类型, 如果只使用`HTMLElement`其实是不够的,
+像上面的例子来说使用`HTMLDivElement`才不会出现类型错误
+![](https://user-images.githubusercontent.com/6764957/116914284-1c436380-ac7d-11eb-9150-f52c571c5f07.png)
+
+#### 可变的 ref
+
+具有可变的 ref: 提供所需的类型, 并且确保初始值是包含在提供的类型中.
+
+```tsx
+import { useRef, useEffect } from 'react';
+
+function Foo() {
+  // 将返回 MutableRefObject<number|undefined>
+  const intervalRef = useRef<number>();
+
+  useEffect(() => {
+    // 可以给它赋值
+    intervalRef.current = setInterval(() => {}, 1000);
+    return () => clearInterval(intervalRef.current);
+  }, []);
+
+  return <button onClick={() => {}}>Cancel timer</button>;
+}
+```
+
+## useImperativeHandle
+
+```tsx
+import React, { useImperativeHandle, useRef, forwardRef, useEffect } from 'react';
+
+type ListRef<ItemType> = { scrollToItem(item: ItemType): void };
+
+type ListProps<ItemType> = {
+  items: ItemType[];
+  innerRef?: React.Ref<ListRef<ItemType>>;
+};
+
+function List<ItemType>(props: ListProps<ItemType>) {
+  useImperativeHandle(props.innerRef, () => ({
+    scrollToItem() {},
+  }));
+  return null;
+}
+
+type FancyInputRef = {
+  focus: () => void;
+};
+const FancyInput = forwardRef<FancyInputRef, any>((props, ref) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      inputRef.current?.focus();
+    },
+  }));
+  return <input ref={inputRef} />;
+});
+
+const ListDemo = () => {
+  const ref = useRef<ListRef<number>>(null);
+  const inputRef = useRef<FancyInputRef>(null);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  });
+
+  return (
+    <div>
+      <List items={[1, 2, 3, 4, 5]} innerRef={ref} />
+      <FancyInput ref={inputRef} />
+    </div>
+  );
+};
+```
+
+### 自定义 hooks
+
+如果在指定 hooks 中返回一个数组, 默认情况下会自动推断出一个联合类型,
+但是实际上我们可能希望推断出一个元祖, 这个时候可以使用`const`断言.
+
+```tsx
+// type '10'
+let x = 10 as const;
+
+// type 'readonly [10,20]'
+let y = [10, 20] as const;
+
+// type '{readonly text: "hello"}'
+let z = { text: 'hello' } as const;
+```
+
+```tsx
+import { useState } from 'react';
+
+export function useLoading() {
+  const [isLoading, setState] = useState(false);
+  const load = (aPromise: Promise<any>) => {
+    setState(true);
+    return aPromise.finally(() => setState(false));
+  };
+  return [isLoading, load] as const;
+}
+```
+
+当然我们也可以使用类型断言`as`的方式.
+
+```tsx
+import { useState } from 'react';
+
+export function useLoading() {
+  const [isLoading, setState] = useState(false);
+  const load = (aPromise: Promise<any>) => {
+    setState(true);
+    return aPromise.finally(() => setState(false));
+  };
+  return [isLoading, load] as [boolean, (aPromise: Promise<any>) => Promise<any>];
+}
+```
+
+如果大量的自定义 hook 都是返回数组的话, 可以实现一个辅助函数`tuplify`.
+
+```tsx
+import { useState } from 'react';
+const tuplify = <T extends any[]>(...elements: T) => elements;
+
+const useToggle = () => {
+  const [value, setValue] = useState(false);
+  const toggle = () => setValue(!value);
+
+  return [value, toggle]; // (boolean | (() => void))[]
+};
+
+const useToggleTuple = () => {
+  const [value, setValue] = useState(false);
+  const toggle = () => setValue(!value);
+
+  return tuplify(value, toggle); // [boolean, ()=>void]
+};
+```
+
+如果返回值大于两个以后的 hook 返回对象更加合适, 而不是返回元祖
+
+```tsx
+import { useState } from 'react';
+
+const useCounter = (initialValue?: number) => {
+  const [count, setCount] = useState(initialValue || 0);
+
+  const increment = () => setCount(x => x + 1);
+  const decrement = () => setCount(x => x - 1);
+  const reset = () => setCount(initialValue || 0);
+
+  return {
+    count,
+    increment,
+    decrement,
+    reset,
+    setCount,
+  } as const;
+};
 ```
