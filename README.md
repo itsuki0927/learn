@@ -21,3 +21,7 @@
 ## browser
 
 1. [浏览器解析](https://github.com/itsuki0927/learn/blob/main/browser/parsing.md)
+
+## git
+
+1. [文件重命名的两种方式](https://github.com/itsuki0927/learn/blob/main/git/rename-file.md)
