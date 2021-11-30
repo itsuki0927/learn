@@ -9,6 +9,7 @@
 ## ts
 
 1. [enum](https://github.com/itsuki0927/learn/blob/main/ts/enum.md)
+2. [type 与 interface 区别](https://github.com/itsuki0927/learn/blob/main/ts/type-diff-interface.md)
 
 ## security
 
