@@ -18,6 +18,7 @@
 ## react
 
 1. [hook](https://github.com/itsuki0927/learn/blob/main/react/ts/hook.md)
+2. [class](https://github.com/itsuki0927/learn/blob/main/react/ts/class.md)
 
 ## browser
 
