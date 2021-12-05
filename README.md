@@ -31,3 +31,4 @@
 
 1. [文件重命名的两种方式](https://github.com/itsuki0927/learn/blob/main/git/rename-file.md)
 2. [Git 对象模型](https://github.com/itsuki0927/learn/blob/main/git/object-model.md)
+3. [Git 小记](https://github.com/itsuki0927/learn/blob/main/git/note.md)
