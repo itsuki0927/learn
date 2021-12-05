@@ -17,6 +17,8 @@
 
 ## react
 
+### ts
+
 1. [hook](https://github.com/itsuki0927/learn/blob/main/react/ts/hook.md)
 2. [class](https://github.com/itsuki0927/learn/blob/main/react/ts/class.md)
 3. [表单和事件](https://github.com/itsuki0927/learn/blob/main/react/ts/formsAndEvents.md)
