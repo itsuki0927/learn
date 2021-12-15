@@ -5,6 +5,7 @@
 ## 文章
 
 1. [csrf](https://github.com/itsuki0927/learn/blob/main/article/csrf.md)
+2. [防范 xss](https://github.com/itsuki0927/learn/blob/main/article/defined-xss.md)
 
 ## js
 
