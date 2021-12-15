@@ -11,7 +11,7 @@ props drilling 是数据以 props 的形式从 React 组件树中的一部分传
 1. `App` 首先把`prop`传递给`Dashboard`
 2. `Dashboard` 传递给 `DashboardContent`(并不需要 props, 只是做一层转发)
 3. `DashboardContent` 传递给 `WelcomeMessage`(并不需要 props, 只是做一层转发)
-4. `WelcomeMessage` 接收`user props` 进行渲染(终于到达需要 props 得地方了)
+4. `WelcomeMessage` 接收`user props` 进行渲染(终于到达需要 props 的地方了)
 
 看一下代码:
 
@@ -86,7 +86,8 @@ function Dashboard({ children }) {
 function DashboardContent({ children }) {
   return (
     <div>
-      <h3>DashboardContent</h3>;{children}
+      <h3>DashboardContent</h3>
+      {children}
     </div>
   );
 }
@@ -184,7 +185,7 @@ function WelcomeMessage() {
 
 > Context 主要应用场景在于很多不同层级的组件需要访问同样一些的数据, 比如说用户信息、主题或者语言。
 
-如果需要使用 Context, 请注意它让组件复用更加困难, 换句话来说: 无法脱离"Context"去复用组件。
+如果需要使用 Context, 请注意它让组件复用更加困难, 换句话来说: **无法脱离"Context"去复用组件**。
 
 ```jsx
 function OtherPage() {
@@ -199,9 +200,9 @@ function OtherPage() {
 这两种方式如果选择取决于你自己, 各有利弊, 我自己的想法是如果组件层级不复杂时组合肯定要优于 Context, 有以下两点。
 
 1. 第一点: 使用了 Context 会受到它的约束, 无法脱离"Context"。
-2. 第二点: 如果 value 是一个对象的话, 其他组件依赖于对象中的某一个值, 即使依赖对象的那个值没有改变还是会进行 rerender。
+2. 第二点: 如果 Context value 是一个对象的话, 其他组件依赖于对象中的某一个值`a`, 即使依赖对象的那个值`a`没有改变还是会进行 rerender。
 3. 第三点: 使用组合可以更加灵活, 你可以随意组合任意的`<Component>`, 让你的组件看起来不像是黑盒, 并且拓展性更强。
 
 如果组件层级复杂的话或者一些全局数据, 个人还是推荐使用 Context, 加上 Hooks 可以复用逻辑, 还是挺舒服的。
 
-最后在看 React 如何设计的更好, 然后结合在自己的博客代码中,发现了这些知识点, 结合自己在个人博客上就是使用 Context 解决 props drilling, 在后面发现使用组合更加合适, 这一点点过来, 还挺有意思的, 突然觉得 React 太厉害了, 设计出一个好的 React 应用一定是有一个好的抽象, 现在回过头来看官方文档, 只能说太香了, 官方文档牛逼!!!。
+最后在看 React 如何设计的更好, 发现了这些知识点, 再结合自己在个人博客上就是使用 Context 解决 props drilling, 在后面发现使用组合更加合适, 这一点点过来, 还挺有意思的, 突然觉得 React 太厉害了, 设计出一个好的 React 应用一定是有一个好的抽象, 现在回过头来看官方文档, 只能说太香了, 官方文档牛逼!!!。
