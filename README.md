@@ -18,6 +18,11 @@
 
 ## react
 
+### 所思
+
+1. [props 钻取](https://github.com/itsuki0927/learn/blob/main/react/propsDrilling.md)
+2. [context + hooks](https://github.com/itsuki0927/learn/blob/main/react/context.md)
+
 ### ts
 
 1. [hook](https://github.com/itsuki0927/learn/blob/main/react/ts/hook.md)
@@ -25,7 +30,6 @@
 3. [表单和事件](https://github.com/itsuki0927/learn/blob/main/react/ts/formsAndEvents.md)
 4. [context](https://github.com/itsuki0927/learn/blob/main/react/ts/context.md)
 5. [forwardRef-createRef](https://github.com/itsuki0927/learn/blob/main/react/ts/forwardRef-createRef.md)
-6. [props 钻取](https://github.com/itsuki0927/learn/blob/main/react/propsDrilling.md)
 
 ## browser
 
