@@ -6,7 +6,7 @@
 
 1. [csrf](https://github.com/itsuki0927/learn/blob/main/article/csrf.md)
 2. [防范 xss](https://github.com/itsuki0927/learn/blob/main/article/defined-xss.md)
-3. [2021 总结](https://github.com/itsuki0927/learn/blob/main/article/bye-2021.md)
+3. [从专升本到互联网大厂 - 我的 2021](https://github.com/itsuki0927/learn/blob/main/article/bye-2021.md)
 
 ## js
 
